@@ -45,7 +45,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-df = pd.read_pickle('data/data.df')
+df = pd.read_pickle('app/data.df')
 age_max = df['Age'].max()
 nihss_max = df['NIHSS'].max()
 outcome_dict = {0: 'Death', 1: 'Inpatient', 2: 'CH', 3: 'Home'}
