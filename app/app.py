@@ -230,5 +230,7 @@ def update_output(value):
 def update_output(value):
     return 'MRS: {}'.format(value)
 
+server = app.server
+
 if __name__ == '__main__':
     app.run_server(debug=True)
