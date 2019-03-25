@@ -168,13 +168,19 @@ def update_graph(age, mrs, nihss):
     fig = tools.make_subplots(rows=1, cols=6,
                               shared_xaxes=False,
                               shared_yaxes=True,
-                              vertical_spacing=0.001)
+                              vertical_spacing=0.001,
+                              subplot_titles=('MRS=0', 'MRS=1', 'MRS=2',
+                                              'MRS=3', 'MRS=4', 'MRS=5')
+                              )
+    # Ugly way to set fontsize
+    for i in fig['layout']['annotations']:
+        i['font'] = dict(size=12)
 
     for pos in range(1, 7):
         fig.append_trace(_plot_mrs_level(mrs, pos), 1, pos)
 
     fig['layout'].update(shapes=_draw_crosshairs(age, nihss, mrs))
-    fig['layout'].update(margin=dict(t=5, l=50, r=0))
+    fig['layout'].update(margin=dict(t=20, l=50, r=0))
     fig['layout'].update(height=300)
     fig['layout'].update(xaxis=dict(range=[0, age_max + 5]),
                          yaxis=dict(range=[0, nihss_max + 5]),
@@ -186,10 +192,57 @@ def update_graph(age, mrs, nihss):
                          xaxis6=dict(range=[0, age_max + 5]))
 
     fig['layout'].update(showlegend=False)
-    fig['layout'].update(xaxis=dict(
-        title='Age'))
+    fig['layout'].update(
+        xaxis=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            )),
+        xaxis1=dict(
+        title='Age',
+        titlefont=dict(
+            size=11,
+            color='darkgrey'
+        )),
+        xaxis2=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            )),
+        xaxis3=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            )),
+        xaxis4=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            )),
+        xaxis5=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            )),
+        xaxis6=dict(
+            title='Age',
+            titlefont=dict(
+                size=11,
+                color='darkgrey'
+            ))
+    )
     fig['layout'].update(yaxis=dict(
-        title='NIHSS'))
+        title='NIHSS',
+        titlefont=dict(
+            size=11,
+            color='darkgrey'
+        )
+    ))
 
     return fig
 
