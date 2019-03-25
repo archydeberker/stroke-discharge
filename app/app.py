@@ -7,6 +7,39 @@ from dash.dependencies import Input, Output
 import numpy as np
 from plotly import tools
 import pandas as pd
+import joblib
+
+
+TRAIN_MEAN = [8.137795, 73.759843]
+TRAIN_STD = [7.223710, 14.157503]
+
+
+def normalize(item, mean, std):
+    return np.asarray((item-mean) / std).reshape(1, -1)
+
+
+def one_hot_mrs(mrs):
+    z = np.zeros(6)
+    z[mrs] = 1
+    return z
+
+
+def call_model(model, age, mrs, nihss):
+    example = np.concatenate([normalize(nihss, TRAIN_MEAN[0], TRAIN_STD[0]),
+                              normalize(age, TRAIN_MEAN[1], TRAIN_STD[1]),
+                              one_hot_mrs(mrs).reshape(1, -1)
+                              ],
+                             axis=1)
+    print('Calling model')
+    probs = model.predict_proba(example)
+    print(f'Probabilities are {probs}')
+    return probs[0]
+
+
+def load_model(path):
+    model = joblib.load(path)
+    return model
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -15,11 +48,16 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 df = pd.read_pickle('data/data.df')
 age_max = df['Age'].max()
 nihss_max = df['NIHSS'].max()
-outcome_map = {o: i for i, o in enumerate(df['Outcome'].unique())}
-outcome_colorscale = [[0, 'green'],[0.24 ,'green'],
-                      [.25, 'red'],[.49, 'red'],
+outcome_dict = {0: 'Death', 1: 'Inpatient', 2: 'CH', 3: 'Home'}
+inverse_outcome_dict = {v:k for k,v in outcome_dict.items()}
+
+outcome_colorscale = [[0, 'green'], [0.24 ,'green'],
+                      [.25, 'red'], [.49, 'red'],
                       [.5, 'orange'], [.74, 'orange'],
                       [.75, 'blue'], [1., 'blue'] ]
+
+model = load_model('code/logistic_regression.model')
+
 
 app.layout = html.Div(className='container',
                       style={'height': '100%'},
@@ -83,7 +121,7 @@ def _draw_crosshairs(age, nihss, mrs):
              'x1': age,
              'y1': nihss_max,
              'line': {
-                 'color': 'rgba(200, 50, 50, .3)',
+                 'color': 'rgba(200, 50, 50, .7)',
                  'width': 2},
              },
             {
@@ -95,7 +133,7 @@ def _draw_crosshairs(age, nihss, mrs):
                 'x1': age_max,
                 'y1': nihss,
                 'line': {
-                    'color': 'rgba(200, 50, 50, .3)',
+                    'color': 'rgba(200, 50, 50, .7)',
                     'width': 2},
             }
             ]
@@ -111,25 +149,20 @@ def update_graph(age, mrs, nihss):
     def _plot_mrs_level(mrs, pos):
         data = df.loc[df['MRS'] == pos - 1, ['Age', 'NIHSS']].values
         outcome = df.loc[df['MRS'] == pos - 1, 'Outcome'].values
-
         return go.Scatter(x=data[:, 0],
                           y=data[:, 1],
                           mode='markers',
                           marker=dict(
                               size=5,
-                              color=[outcome_map[o] for o in outcome],
+                              color=[inverse_outcome_dict[o] for o in outcome],
                               colorscale=outcome_colorscale,
                               opacity=0.6 if mrs == pos - 1 else 0.2,
                               colorbar=dict(
                                   titleside='top',
-                                  tickmode='array',
                                   ticks='outside',
-                                  ticktext=list(outcome_map.keys()),
-                                  tickvals=[0, 1, 2, 3],
-                                  tick0=0,
-                                  dtick=1,
-                                  borderwidth=0,
-                                  thickness=20)
+                                  tickvals=[0, 1, 1.9, 2.7],
+                                  ticktext=list(outcome_dict.values()),
+                                  thickness=20) if pos == 1 else None
                           ))
 
     fig = tools.make_subplots(rows=1, cols=6,
@@ -164,14 +197,16 @@ def update_graph(age, mrs, nihss):
 @app.callback(
     Output('graph-with-slider', 'figure'),
     [Input('age-slider', 'value'), Input('mrs-slider', 'value'), Input('nihss-slider', 'value'), ])
-def plot_variables(age, mrs, nihss):
+def plot_model_predictions(age, mrs, nihss):
+    probs = call_model(model, age, mrs, nihss)
     return {
         'data': [
-            {'x': [1, 2, 3], 'y': [age, mrs, nihss], 'type': 'bar', 'name': 'values'},
+            {'x': list(outcome_dict.values()), 'y': probs, 'type': 'bar', 'name': 'values'},
         ],
         'layout': go.Layout(
-            margin={'t': 0},
-            height=350)
+            margin={'t': 10},
+            height=350,
+            yaxis=dict(range=[0, 1], title='probability'))
     }
 
 
@@ -194,7 +229,6 @@ def update_output(value):
     [Input('mrs-slider', 'value')])
 def update_output(value):
     return 'MRS: {}'.format(value)
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
