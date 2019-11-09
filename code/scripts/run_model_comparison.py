@@ -1,10 +1,11 @@
 import logging
-from data import load_data_with_gender, stratified_sample_df
+import pickle
 
 import numpy as np
-import pickle
+
 import constants
-from modelling import get_features, find_and_evaluate_best_random_forest
+from data import load_data_with_gender, stratified_sample_df
+from modelling import find_and_evaluate_best_random_forest, get_features
 from utils import get_all_combinations_of_predictors
 
 np.random.seed(1234)
@@ -34,8 +35,12 @@ if __name__ == "__main__":
     all_models = {}
     for combo in all_combinations:
         logger.info(f"Commencing for {' '.join(combo)}")
-        all_scores[combo], all_models[combo] = find_and_evaluate_best_random_forest([features[x] for x in combo], y)
-        logging.info(f"Mean accuracy for {' '.join(combo)} is {np.mean(all_scores[combo])}")
 
-        pickle.dump(all_scores, open("../results/all_scores.p", "wb"))
-        pickle.dump(all_models, open("../results/all_models.p", "wb"))
+        rf_random = find_and_evaluate_best_random_forest([features[x] for x in combo], y, metric='f1_micro')
+
+        all_scores[combo], all_models[combo] = rf_random.best_score_, rf_random.best_estimator_
+
+        logging.info(f"Mean accuracy for {' '.join(combo)} is {all_scores[combo]}")
+
+        pickle.dump(all_scores, open("../results/all_f1_scores_random.p", "wb"))
+        pickle.dump(all_models, open("../results/all_f1_models_random.p", "wb"))

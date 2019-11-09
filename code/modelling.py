@@ -1,27 +1,27 @@
-from typing import List, Generator
-from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_validate, cross_val_predict, RandomizedSearchCV
-
-from constants import CROSS_VAL, OUTCOME_DICT
-import numpy as np
-
-import pandas as pd
-
-from utils import plot_confusion_matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 import logging
+from typing import Generator, List
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (confusion_matrix, f1_score, precision_score,
+                             recall_score)
+from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
+                                     cross_validate)
+
+from constants import CROSS_VAL, N_ITER, OUTCOME_DICT, SEARCH_GRID
+from utils import plot_confusion_matrix
 
 logger = logging.getLogger(__name__)
 
 
-def random_search(X, y, search_grid):
+def random_search(X, y, search_grid, metric):
     rf = RandomForestClassifier()
 
-    rf_random = RandomizedSearchCV(estimator=rf, param_distributions=search_grid, n_iter=100, cv=CROSS_VAL, verbose=2,
-                                   random_state=42, n_jobs=-1)
+    rf_random = RandomizedSearchCV(estimator=rf, param_distributions=search_grid, n_iter=N_ITER, cv=CROSS_VAL, verbose=2,
+                                   random_state=42, n_jobs=-1, scoring=metric)
     # Fit the random search model
     rf_random.fit(X, y)
 
@@ -60,24 +60,14 @@ def get_features(df):
     }
 
 
-def find_and_evaluate_best_random_forest(features: List, y, outcome_dict=OUTCOME_DICT, cross_val=CROSS_VAL):
+def find_and_evaluate_best_random_forest(features: List, y, metric):
 
     X = np.concatenate(features, axis=1)
 
-    estimators = range(1, 200, 50)
-    depth = range(1, 10, 2)
-    min_samples = range(2, 10, 2)
-
-    logger.info('Commencing grid search')
-    grid = grid_search(
-        X, y, list(estimators), list(depth), list(min_samples), cross_val=cross_val
-    )
-
+    rf_random = random_search(X, y, SEARCH_GRID, metric)
     logger.info('Grid search complete')
-    scores = get_best_result_from_grid(grid)
-    rf = get_best_rf_from_grid(grid)
-    logger.info('Best model found')
-    return scores, rf
+
+    return rf_random
 
 
 def generate_confusion_matrix(model, X, y, outcome_dict=OUTCOME_DICT):

@@ -1,6 +1,7 @@
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
-import itertools
 
 _xlabel_size = 15
 _ylabel_size = 15
@@ -26,8 +27,6 @@ def plot_confusion_matrix(
         print("Normalized confusion matrix")
     else:
         print("Confusion matrix, without normalization")
-
-    print(cm)
 
     plt.imshow(cm, interpolation="nearest", cmap=cmap)
     plt.title(title)
