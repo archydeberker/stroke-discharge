@@ -1,4 +1,5 @@
 import logging
+import pickle
 from typing import Generator, List
 
 import matplotlib.pyplot as plt
@@ -11,7 +12,9 @@ from sklearn.metrics import (confusion_matrix, f1_score, precision_score,
 from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
                                      cross_validate)
 
+import constants
 from constants import CROSS_VAL, N_ITER, OUTCOME_DICT, SEARCH_GRID
+from data import load_data_with_gender, stratified_sample_df
 from utils import plot_confusion_matrix
 
 logger = logging.getLogger(__name__)
@@ -56,7 +59,7 @@ def get_features(df):
         "Age": df["Age"].values.reshape(-1, 1),
         "NIHSS": df["NIHSS"].values.reshape(-1, 1),
         "MRS": pd.get_dummies(df["MRS"]),
-        "Gender": pd.get_dummies(df["Gender"]),
+        "Gender": pd.get_dummies(df["Gender"], drop_first=True  ),
     }
 
 
@@ -89,3 +92,61 @@ def get_best_rf_from_grid(grid):
         max_depth=best_params[1],
         min_samples_split=best_params[2],
     )
+
+
+def fit_and_test_best_model():
+    df_train, df_test = get_train_test_data()
+    validation_models = pickle.load(open('../../results/all_models_random.p', 'rb'))
+    validation_results = pickle.load(open('../../results/all_scores_random.p', 'rb'))
+
+    best_predictors = max(validation_results, key=lambda x: validation_results[x])
+    print(best_predictors)
+    best_model = validation_models[best_predictors]
+
+    features_train, features_test = get_features(df_train), get_features(df_test)
+    y_train = df_train['Outcome'].map({v: k for k, v in constants.OUTCOME_DICT.items()}).values
+    y_test = df_test['Outcome'].map({v: k for k, v in constants.OUTCOME_DICT.items()}).values
+
+    X_train = np.concatenate([features_train[predictor] for predictor in best_predictors], axis=1)
+    X_test = np.concatenate([features_test[predictor] for predictor in best_predictors], axis=1)
+
+    best_model.fit(X_train, y_train)
+    y_pred = best_model.predict(X_test)
+
+    confusion_mtx = confusion_matrix(y_test, y_pred)
+
+    return confusion_mtx, best_model, X_test
+
+
+def get_train_test_data():
+    df = load_data_with_gender(
+        new_data_path="../../../data/Discharge destinations including gender.xlsx",
+        old_data_path="../../../data/Discharge destinations 2.xlsx",
+    )
+
+    df_train = stratified_sample_df(
+        df, col="Outcome", frac=constants.train_frac, random_state=1234
+    )
+    df_test = df.loc[df.index.difference(df_train.index)]
+
+    return df_train, df_test
+
+
+def get_validation_results():
+    validation_models = pickle.load(open('../../results/all_models_random.p', 'rb'))
+
+    df_train, _ = get_train_test_data()
+    features = get_features(df_train)
+    y = df_train['Outcome'].map({v: k for k, v in constants.OUTCOME_DICT.items()}).values
+
+    collated_scores = {}
+
+    for predictors, model in validation_models.items():
+        X = np.concatenate([features[predictor] for predictor in predictors], axis=1)
+
+        logger.info(f"Starting for {' '.join(predictors)}")
+        scores = cross_validate(model, X, y, scoring=("accuracy"), cv=constants.CROSS_VAL)
+        collated_scores[predictors] = scores['test_score']
+        logger.info(f"Finished for {' '.join(predictors)}")
+
+    return collated_scores

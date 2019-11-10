@@ -1,10 +1,11 @@
 train_frac = 0.9
 test_frac = 0.1
 
-CROSS_VAL = 10
+CROSS_VAL = 2
 N_ITER = 100
 
-OUTCOME_DICT = {0: "Death", 1: "Inpatient", 2: "CH", 3: "Home"}
+OUTCOME_DICT = {0: "Death", 1: "Inpatient", 2: "Comm. Hosp.", 3: "Home"}
+order = ['Home', 'Comm. Hosp.', 'Inpatient', 'Death']
 
 n_estimators = range(1, 500, 50)
 max_features = ['auto', 'sqrt']
@@ -16,6 +17,7 @@ SEARCH_GRID = {'n_estimators': n_estimators,
                'max_features': max_features,
                'max_depth': max_depth,
                'min_samples_split': min_samples_split}
+
 full_figure_width = 18
 figure_height = 8
 _xlabel_size = 15

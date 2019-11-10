@@ -19,7 +19,7 @@ def load_data_with_gender(
     original_df.reset_index(inplace=True)
     original_df.drop(["index", "Key", "Unnamed: 0"], axis=1, inplace=True)
 
-    outcome_dict = {0: "Death", 1: "Inpatient", 2: "CH", 3: "Home"}
+    outcome_dict = {0: "Death", 1: "Inpatient", 2: "Comm. Hosp.", 3: "Home"}
     original_df["Outcome"] = original_df["Outcome"].map(lambda x: outcome_dict[x])
 
     new_df = pd.read_excel(
@@ -34,11 +34,11 @@ def load_data_with_gender(
 
     NEW_TO_OLD_OUTCOME_MAPPING = {
         "T": "Inpatient",
-        "TC": "CH",
+        "TC": "Comm. Hosp.",
         "D": "Death",
         "H": "Home",
         "TN": "Inpatient",
-        "TCN": "CH",
+        "TCN": "Comm. Hosp.",
     }
 
     new_df["Outcome"] = new_df["New Outcome"].map(NEW_TO_OLD_OUTCOME_MAPPING)

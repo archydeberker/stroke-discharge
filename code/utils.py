@@ -32,7 +32,7 @@ def plot_confusion_matrix(
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45, fontsize=int(_xlabel_size * 0.8))
+    plt.xticks(tick_marks, classes, rotation=45, fontsize=int(_xlabel_size * 0.8), ha='right')
     plt.yticks(tick_marks, classes, fontsize=int(_xlabel_size * 0.8))
 
     fmt = ".2f" if normalize else "d"
@@ -46,6 +46,7 @@ def plot_confusion_matrix(
             color="white" if cm[i, j] > thresh else "black",
         )
 
-    plt.tight_layout()
+    # plt.tight_layout()
+    plt.ylim([3.5, -0.5])
     plt.ylabel("True label", fontsize=_xlabel_size)
     plt.xlabel("Predicted label", fontsize=_ylabel_size)
