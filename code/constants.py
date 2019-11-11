@@ -1,12 +1,12 @@
 train_frac = 0.9
 test_frac = 0.1
 
-CROSS_VAL = 2
+CROSS_VAL = 20
 N_ITER = 100
 
 OUTCOME_DICT = {0: "Death", 1: "Inpatient", 2: "Comm. Hosp.", 3: "Home"}
-order = ['Home', 'Comm. Hosp.', 'Inpatient', 'Death']
-
+OUTCOMES = ['Home', 'Comm. Hosp.', 'Inpatient', 'Death']
+features = ['MRS', 'NIHSS', 'Age', 'Gender']
 n_estimators = range(1, 500, 50)
 max_features = ['auto', 'sqrt']
 max_depth = range(2, 100, 10)

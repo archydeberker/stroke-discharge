@@ -1,7 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from constants import full_figure_width, figure_height, _xlabel_size, _ylabel_size, order
+from constants import full_figure_width, figure_height, _xlabel_size, _ylabel_size, OUTCOMES
 from data import load_data_with_gender
 
 
@@ -40,7 +40,7 @@ def plot_figure_2a(df):
 
 
 def plot_figure_2b(df):
-    g = sns.FacetGrid(df, col="Outcome", hue="Outcome", col_order=order)
+    g = sns.FacetGrid(df, col="Outcome", hue="Outcome", col_order=OUTCOMES)
     r_plots = g.map(sns.regplot, "MRS", 'NIHSS')
 
     for ax in r_plots.axes[:, 0]:
@@ -49,7 +49,7 @@ def plot_figure_2b(df):
     with open('../../figures/fig2bi.png', 'wb') as fileout:
         g.fig.savefig(fileout, bbox_inches='tight')
 
-    g = sns.FacetGrid(df, col="Outcome", hue="Outcome", col_order=order)
+    g = sns.FacetGrid(df, col="Outcome", hue="Outcome", col_order=OUTCOMES)
     r_plots = g.map(sns.regplot, "Age", 'NIHSS')
 
     with open('../../figures/fig2bii.png', 'wb') as fileout:

@@ -5,6 +5,7 @@ b) the confusion matrix for the best-performing model, on the test-set
 
 """
 import logging
+from pprint import pprint
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -60,7 +61,10 @@ def plot_graph(collated_scores, confusion_mtx):
 
 if __name__ == '__main__':
     collated_scores = get_validation_results()
-    confusion_mtx_best_model, _, _ = fit_and_test_best_model()
+    confusion_mtx_best_model, _, _, score = fit_and_test_best_model()
+
+    print('Best model result on test set:')
+    pprint(score)
 
     fig = plot_graph(collated_scores, confusion_mtx_best_model)
 
