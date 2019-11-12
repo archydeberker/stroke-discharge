@@ -1,3 +1,4 @@
 paper
 data
 .*
+__pycache__
