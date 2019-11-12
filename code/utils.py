@@ -9,7 +9,7 @@ _ylabel_size = 15
 
 def get_all_combinations_of_predictors(predictors):
     combinations = []
-    for n_predictors in range(1, len(predictors)+1):
+    for n_predictors in range(1, len(predictors) + 1):
         combinations.extend(list(itertools.combinations(predictors, n_predictors)))
 
     return combinations
@@ -32,7 +32,9 @@ def plot_confusion_matrix(
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45, fontsize=int(_xlabel_size * 0.8), ha='right')
+    plt.xticks(
+        tick_marks, classes, rotation=45, fontsize=int(_xlabel_size * 0.8), ha="right"
+    )
     plt.yticks(tick_marks, classes, fontsize=int(_xlabel_size * 0.8))
 
     fmt = ".2f" if normalize else "d"

@@ -28,17 +28,28 @@ if __name__ == "__main__":
     logger.info(f"Train set is {len(df_train)}, test set is {len(df_test)}")
 
     features = get_features(df_train)
-    y = df_train['Outcome'].map({v: k for k, v in constants.OUTCOME_DICT.items()}).values
+    y = (
+        df_train["Outcome"]
+        .map({v: k for k, v in constants.OUTCOME_DICT.items()})
+        .values
+    )
 
-    all_combinations = get_all_combinations_of_predictors(['Age', 'MRS', 'NIHSS', 'Gender'])
+    all_combinations = get_all_combinations_of_predictors(
+        ["Age", "MRS", "NIHSS", "Gender"]
+    )
     all_scores = {}
     all_models = {}
     for combo in all_combinations:
         logger.info(f"Commencing for {' '.join(combo)}")
 
-        rf_random = find_and_evaluate_best_random_forest([features[x] for x in combo], y, metric='f1_micro')
+        rf_random = find_and_evaluate_best_random_forest(
+            [features[x] for x in combo], y, metric="f1_micro"
+        )
 
-        all_scores[combo], all_models[combo] = rf_random.best_score_, rf_random.best_estimator_
+        all_scores[combo], all_models[combo] = (
+            rf_random.best_score_,
+            rf_random.best_estimator_,
+        )
 
         logging.info(f"Mean accuracy for {' '.join(combo)} is {all_scores[combo]}")
 

@@ -3,12 +3,15 @@ import pandas as pd
 import os
 
 
-BASE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
+BASE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
 
 
 def load_data_with_gender(
-    new_data_path=os.path.join(BASE_DIR, "data/Discharge destinations including Gender.xlsx"),
-    old_data_path=os.path.join(BASE_DIR, "data/Discharge destinations 2.xlsx")):
+    new_data_path=os.path.join(
+        BASE_DIR, "data/Discharge destinations including Gender.xlsx"
+    ),
+    old_data_path=os.path.join(BASE_DIR, "data/Discharge destinations 2.xlsx"),
+):
 
     """
     Load the data into a dataframe.
@@ -58,7 +61,7 @@ def load_data_with_gender(
     new_df.drop("New Outcome", axis=1, inplace=True)
 
     # Map gender to 0 = Female, 1 = Male so we can avoid using strings
-    new_df['Gender'] = new_df['Gender'].map({'F': 0, 'M': 1})
+    new_df["Gender"] = new_df["Gender"].map({"F": 0, "M": 1})
 
     return new_df
 
