@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 from constants import full_figure_width, figure_height, _xlabel_size, _ylabel_size, OUTCOMES
 from data import load_data_with_gender
+import numpy as np
+
+np.random.seed(1234)
 
 
 def plot_figure_2a(df):
@@ -11,7 +14,7 @@ def plot_figure_2a(df):
     _plot_style['axes.spines.right'] = False
     _plot_style['axes.spines.top'] = False
 
-    f, axes = plt.subplots(1, 3, figsize=(full_figure_width, figure_height))
+    f, axes = plt.subplots(1, 4, figsize=(full_figure_width, figure_height))
     sns.set_style(_plot_style)
 
     sns.catplot(x="MRS", y="NIHSS", kind="swarm", data=df, ax=axes[0], palette='Blues')
@@ -33,6 +36,14 @@ def plot_figure_2a(df):
     plt.xlabel("MRS",fontsize=_xlabel_size)
     plt.ylabel('Age', fontsize=_ylabel_size)
     plt.tick_params(axis='both', which='major', labelsize=10)
+    sns.despine()
+
+    sns.catplot(x="Gender", y="Age", kind="swarm", data=df, ax=axes[3], palette='Blues')
+    plt.sca(axes[3])
+    plt.xlabel("Gender", fontsize=_xlabel_size)
+    plt.ylabel('Age', fontsize=_ylabel_size)
+    plt.tick_params(axis='both', which='major', labelsize=10)
+    plt.xticks([0, 1], ['Female', 'Male'])
     sns.despine()
 
     with open('../../figures/fig2a.png', 'wb') as fileout:

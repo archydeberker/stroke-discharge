@@ -10,6 +10,7 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 import constants
 from modelling import fit_and_test_best_model, get_validation_results
@@ -17,6 +18,8 @@ from utils import plot_confusion_matrix
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+np.random.seed(1234)
 
 
 def plot_graph(collated_scores, confusion_mtx):

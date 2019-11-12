@@ -45,11 +45,18 @@ def demographics_of_split(df):
     )
     df_test = df.loc[df.index.difference(df_train.index)]
 
+    print('test df:')
+    print(len(df_train))
+    print(df_train['Outcome'].value_counts())
+    print('test df:')
+    print(len(df_test))
+    print(df_test['Outcome'].value_counts())
+
     def _test_column_equality(feature):
         t, p = stats.ttest_ind(df_test[feature], df_train[feature])
         return {feature: dict(t=t,
                               p=p,
-                              test_mean=df_train[feature].mean(),
+                              test_mean=df_test[feature].mean(),
                               train_mean=df_train[feature].mean(),
                               )}
 

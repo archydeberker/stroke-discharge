@@ -2,13 +2,15 @@ import logging
 import pickle
 from typing import Generator, List
 
+
+from sklearn.metrics import classification_report
+from sklearn.base import clone
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (confusion_matrix, f1_score, precision_score,
-                             recall_score)
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
                                      cross_validate)
 from sklearn.dummy import DummyClassifier
@@ -23,6 +25,8 @@ import os
 logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)),  '..')
+
+np.random.seed(1234)
 
 
 def get_results_dummy_model():
@@ -110,6 +114,10 @@ def get_best_rf_from_grid(grid):
 
 
 def fit_and_test_best_model():
+
+    # This is important to guarantee that performance is the same regardless of when this function is called
+    np.random.seed(1234)
+
     df_train, df_test = get_train_test_data()
     print('Row 3 of test df:')
     print(df_test.iloc[3])
@@ -118,7 +126,7 @@ def fit_and_test_best_model():
 
     best_predictors = max(validation_results, key=lambda x: validation_results[x])
     print(best_predictors)
-    best_model = validation_models[best_predictors]
+    best_model = clone(validation_models[best_predictors])
 
     features_train, features_test = get_features(df_train), get_features(df_test)
     y_train = df_train['Outcome'].map({v: k for k, v in constants.OUTCOME_DICT.items()}).values
@@ -127,11 +135,17 @@ def fit_and_test_best_model():
     X_train = np.concatenate([features_train[predictor] for predictor in best_predictors], axis=1)
     X_test = np.concatenate([features_test[predictor] for predictor in best_predictors], axis=1)
 
+    print(X_test.sum())
+
     best_model.fit(X_train, y_train)
     y_pred = best_model.predict(X_test)
-    score = best_model.score(X_test, y_test)
+    accuracy = best_model.score(X_test, y_test)
+
+    print(f"Best model accuracy is {accuracy}")
 
     confusion_mtx = confusion_matrix(y_test, y_pred)
+    print(confusion_mtx)
+    score = classification_report(y_test, y_pred, target_names=constants.OUTCOME_DICT.values())
 
     return confusion_mtx, best_model, X_test, score
 
