@@ -65,7 +65,7 @@ def plot_graph(collated_scores, confusion_mtx):
 
     plt.sca(axes[1])
     plot_confusion_matrix(
-        confusion_mtx, classes=constants.OUTCOME_DICT.values(), normalize=True
+        confusion_mtx, classes=constants.OUTCOME_DICT.values(), normalize=True, include_raw=True,
     )
     plt.title("")
     plt.tight_layout(pad=0.4, w_pad=4, h_pad=1.0)

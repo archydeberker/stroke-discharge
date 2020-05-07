@@ -15,14 +15,25 @@ def get_all_combinations_of_predictors(predictors):
     return combinations
 
 
+def _format_number(number, normalize, include_raw, raw=None):
+    if normalize and not include_raw:
+        return f"{number:.2f}"
+    elif not normalize:
+        return f"{number}"
+    elif normalize and include_raw:
+        return f"{number:.2f } ({raw})"
+
+
 def plot_confusion_matrix(
-    cm, classes, normalize=False, title="Confusion matrix", cmap=plt.cm.Blues
+    cm, classes, normalize=False, title="Confusion matrix", cmap=plt.cm.Blues,
+        include_raw=False,
 ):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
     if normalize:
+        raw = cm
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
         print("Normalized confusion matrix")
     else:
@@ -38,12 +49,15 @@ def plot_confusion_matrix(
     plt.yticks(tick_marks, classes, fontsize=int(_xlabel_size * 0.8))
 
     fmt = ".2f" if normalize else "d"
+    if include_raw and normalize:
+        fmt = '.2f (d)'
+
     thresh = cm.max() / 2.0
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(
             j,
             i,
-            format(cm[i, j], fmt),
+            _format_number(cm[i,j], normalize, include_raw, raw= raw[i,j] if include_raw else None),
             horizontalalignment="center",
             color="white" if cm[i, j] > thresh else "black",
         )
