@@ -48,7 +48,7 @@ def plot_figure(df):
     sns.countplot(x="Outcome", data=df, hue="Gender", ax=axes[3], order=OUTCOMES)
     plt.sca(axes[3])
     plt.xlabel("Outcome", fontsize=_xlabel_size)
-    plt.ylabel("Count", fontsize=_ylabel_size)
+    plt.ylabel("Gender", fontsize=_ylabel_size)
 
     leg = axes[3].get_legend()
     new_labels = ["Female", "Male"]
