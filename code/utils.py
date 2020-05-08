@@ -21,7 +21,7 @@ def _format_number(number, normalize, include_raw, raw=None):
     elif not normalize:
         return f"{number}"
     elif normalize and include_raw:
-        return f"{number:.2f } ({raw})"
+        return f"{number:.2f} ({raw})"
 
 
 def plot_confusion_matrix(
